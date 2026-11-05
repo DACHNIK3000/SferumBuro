@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: buro_bot
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+  bot:
+    build: .
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/buro_bot
+    depends_on:
+      - postgres
+    restart: unless-stopped

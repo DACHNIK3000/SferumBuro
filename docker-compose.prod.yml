@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: sferumburo_postgres_prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    # ПОРТЫ НЕ ПРОБРАСЫВАЕМ НАРУЖУ!
+    # Это защитит базу от взлома и исключит конфликт, если на сервере уже работает другой postgres (порт 5432).
+    # Бот все равно сможет подключиться к базе по внутренней сети Docker.
+    restart: unless-stopped
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+
+  bot:
+    build: .
+    container_name: sferumburo_bot_prod
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      # Обращаемся к БД по имени сервиса (postgres) внутри сети Docker
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      - postgres
+    ports:
+      # Пробрасываем порт ТОЛЬКО на локалхост сервера. 
+      # Nginx будет перенаправлять запросы с домена на этот порт.
+      - "127.0.0.1:18085:8080"
+    restart: unless-stopped
+
+volumes:
+  pgdata_prod:
+    name: sferumburo_pgdata_prod

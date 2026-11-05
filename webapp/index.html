@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Бюро находок Сферум</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=10">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="vk-header">
+            <div class="header-content">
+                <div class="logo">🔍 Бюро находок</div>
+                <div class="user-profile" id="userProfile"></div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="content">
+            <div class="hero-section" id="main-section">
+                <h1>Что-то потеряли?</h1>
+                <p>Или нашли чужую вещь? Мы поможем.</p>
+                
+                <div class="sferum-list">
+                    <div class="sferum-list-item" onclick="showSection('add-item')">
+                        <div class="item-icon bg-gradient-blue">📦</div>
+                        <div class="item-text">
+                            <div class="item-title">Я нашел</div>
+                            <div class="item-subtitle">Добавить найденную вещь в базу</div>
+                        </div>
+                        <div class="item-chevron">›</div>
+                    </div>
+
+                    <div class="sferum-list-item" onclick="showSection('search-item')">
+                        <div class="item-icon bg-gradient-purple">🔍</div>
+                        <div class="item-text">
+                            <div class="item-title">Я потерял</div>
+                            <div class="item-subtitle">Искать пропажу среди находок</div>
+                        </div>
+                        <div class="item-chevron">›</div>
+                    </div>
+                    
+                    <div class="sferum-list-item" onclick="showSection('admin-panel')">
+                        <div class="item-icon bg-gradient-red">🛡</div>
+                        <div class="item-text">
+                            <div class="item-title">Админ-панель</div>
+                            <div class="item-subtitle">Управление бюро находок</div>
+                        </div>
+                        <div class="item-chevron">›</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Секция: Добавление вещи -->
+            <section id="add-item" class="card-section hidden">
+                <div class="vk-card">
+                    <h2>Новая находка</h2>
+                    <form id="addForm">
+                        <div class="input-group">
+                            <label>Что вы нашли?</label>
+                            <input type="text" id="itemName" placeholder="Например: Ключи" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Категория</label>
+                            <div class="select-wrapper">
+                                <select id="itemCategory">
+                                    <option>Электроника</option>
+                                    <option>Одежда</option>
+                                    <option>Документы</option>
+                                    <option>Ключи</option>
+                                    <option>Другое</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Где нашли?</label>
+                            <input type="text" id="itemPlace" placeholder="Например: Двор" required>
+                        </div>
+                        <button type="submit" class="vk-btn-primary full-width mt-2">Сообщить</button>
+                        <button type="button" class="vk-btn-secondary full-width mt-1" onclick="showSection('main')">Отмена</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Секция: Поиск вещи -->
+            <section id="search-item" class="card-section hidden">
+                <div class="vk-card">
+                    <h2>Поиск пропажи</h2>
+                    <div class="input-group">
+                        <label>Что вы потеряли?</label>
+                        <input type="text" id="searchInput" placeholder="Например: Рюкзак">
+                    </div>
+                    <button class="vk-btn-primary full-width mt-2" onclick="performSearch()">Искать</button>
+                    <button type="button" class="vk-btn-secondary full-width mt-1" onclick="showSection('main')">Отмена</button>
+                    
+                    <div id="searchResults" style="margin-top: 24px; display: none;">
+                        <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">Результаты поиска появятся здесь</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Секция: Админ-панель -->
+            <section id="admin-panel" class="card-section hidden">
+                <div class="vk-card">
+                    <h2>Панель управления</h2>
+                    
+                    <div class="sferum-list mt-2">
+                        <div class="sferum-list-item" onclick="adminAction('stats')">
+                            <div class="item-icon bg-gradient-blue" style="font-size:16px;">📊</div>
+                            <div class="item-text"><div class="item-title">Статистика</div></div>
+                        </div>
+                        <div class="sferum-list-item" onclick="adminAction('recent')">
+                            <div class="item-icon bg-gradient-purple" style="font-size:16px;">📋</div>
+                            <div class="item-text"><div class="item-title">Последние объявления</div></div>
+                        </div>
+                        <div class="sferum-list-item" onclick="adminAction('gen_code')">
+                            <div class="item-icon bg-gradient-blue" style="font-size:16px;">🔑</div>
+                            <div class="item-text"><div class="item-title">Создать код</div></div>
+                        </div>
+                        <div class="sferum-list-item" onclick="adminAction('list_admins')">
+                            <div class="item-icon bg-gradient-purple" style="font-size:16px;">👥</div>
+                            <div class="item-text"><div class="item-title">Список админов</div></div>
+                        </div>
+                        <div class="sferum-list-item" onclick="adminAction('revoke_admin')">
+                            <div class="item-icon bg-gradient-red" style="font-size:16px;">❌</div>
+                            <div class="item-text"><div class="item-title">Снять админа</div></div>
+                        </div>
+                    </div>
+
+                    <div id="adminResults" style="margin-top: 24px; display: none; background: rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; text-align: left; font-size: 0.95rem; color: var(--text-main);">
+                        <!-- Здесь будет ответ -->
+                    </div>
+
+                    <button type="button" class="vk-btn-secondary full-width mt-2" onclick="showSection('main')">Назад в меню</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- VK Bridge -->
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+    <script src="app.js?v=10"></script>
+</body>
+</html>

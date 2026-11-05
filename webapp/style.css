@@ -1,0 +1,295 @@
+:root {
+    /* VK Mini App Dynamic Variables */
+    --vk-bg: var(--background_page, #19191A);
+    --vk-card-bg: var(--background_content, #232324);
+    --vk-card-hover: var(--background_hover, #2C2D2E);
+    
+    --vk-text-main: var(--text_primary, #E1E3E6);
+    --vk-text-muted: var(--text_secondary, #818C99);
+    
+    --vk-button-primary-bg: var(--button_primary_background, #FFFFFF);
+    --vk-button-primary-text: var(--button_primary_foreground, #000000);
+    
+    --vk-button-secondary-bg: var(--button_secondary_background, rgba(255, 255, 255, 0.1));
+    --vk-button-secondary-text: var(--button_secondary_foreground, #E1E3E6);
+    
+    --vk-border: var(--separator_common, rgba(255, 255, 255, 0.1));
+    --vk-input-bg: var(--field_background, rgba(255, 255, 255, 0.05));
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--vk-bg);
+    color: var(--vk-text-main);
+    line-height: 1.5;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease;
+}
+
+.app-container {
+    max-width: 600px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.vk-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--vk-bg);
+    border-bottom: 1px solid var(--vk-border);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+}
+
+.logo {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--vk-text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--vk-card-bg);
+}
+
+.user-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--vk-text-main);
+}
+
+/* Typography */
+.content {
+    flex: 1;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--vk-text-main);
+    letter-spacing: -0.02em;
+}
+
+h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--vk-text-main);
+}
+
+.hero-section > p {
+    font-size: 1rem;
+    color: var(--vk-text-muted);
+    margin-bottom: 32px;
+}
+
+/* Sferum List style */
+.sferum-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sferum-list-item {
+    background: var(--vk-card-bg);
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.2s ease;
+}
+
+.sferum-list-item:active {
+    transform: scale(0.98);
+    background: var(--vk-card-hover);
+}
+
+.item-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.bg-gradient-blue {
+    background: linear-gradient(135deg, #0077FF 0%, #00BFFF 100%);
+    box-shadow: 0 4px 12px rgba(0, 119, 255, 0.2);
+}
+
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #8A2BE2 0%, #DA70D6 100%);
+    box-shadow: 0 4px 12px rgba(138, 43, 226, 0.2);
+}
+
+.bg-gradient-red {
+    background: linear-gradient(135deg, #FF4500 0%, #FF8C00 100%);
+    box-shadow: 0 4px 12px rgba(255, 69, 0, 0.2);
+}
+
+.item-text {
+    flex: 1;
+}
+
+.item-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--vk-text-main);
+    margin-bottom: 4px;
+}
+
+.item-subtitle {
+    font-size: 0.85rem;
+    color: var(--vk-text-muted);
+    line-height: 1.3;
+}
+
+.item-chevron {
+    color: var(--vk-text-muted);
+    font-size: 1.5rem;
+    font-family: monospace;
+    opacity: 0.5;
+}
+
+/* VK Cards */
+.vk-card {
+    background: var(--vk-card-bg);
+    border-radius: 20px;
+    padding: 24px 20px;
+}
+
+/* Buttons */
+.vk-btn-primary {
+    background: var(--vk-button-primary-bg);
+    color: var(--vk-button-primary-text);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    width: 100%;
+}
+
+.vk-btn-primary:active {
+    opacity: 0.8;
+}
+
+.vk-btn-secondary {
+    background: var(--vk-button-secondary-bg);
+    color: var(--vk-button-secondary-text);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+}
+
+.vk-btn-secondary:active {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.mt-1 { margin-top: 12px; }
+.mt-2 { margin-top: 24px; }
+
+/* Form Elements */
+.input-group {
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--vk-text-muted);
+    margin-left: 4px;
+}
+
+.input-group input, .input-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--vk-border);
+    background: var(--vk-input-bg);
+    color: var(--vk-text-main);
+    font-size: 1rem;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+}
+
+.input-group input:focus, .input-group select:focus {
+    border-color: var(--vk-text-muted);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper select {
+    appearance: none;
+}
+
+/* Utils */
+.hidden {
+    display: none !important;
+}
+
+/* Animations */
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-section:not(.hidden) {
+    animation: slideUpFade 0.3s ease-out forwards;
+}
