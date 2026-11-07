@@ -1,20 +1,20 @@
 :root {
-    /* VK Mini App Dynamic Variables */
-    --vk-bg: var(--background_page, #19191A);
-    --vk-card-bg: var(--background_content, #232324);
-    --vk-card-hover: var(--background_hover, #2C2D2E);
-    
-    --vk-text-main: var(--text_primary, #E1E3E6);
-    --vk-text-muted: var(--text_secondary, #818C99);
-    
-    --vk-button-primary-bg: var(--button_primary_background, #FFFFFF);
-    --vk-button-primary-text: var(--button_primary_foreground, #000000);
-    
-    --vk-button-secondary-bg: var(--button_secondary_background, rgba(255, 255, 255, 0.1));
-    --vk-button-secondary-text: var(--button_secondary_foreground, #E1E3E6);
-    
-    --vk-border: var(--separator_common, rgba(255, 255, 255, 0.1));
-    --vk-input-bg: var(--field_background, rgba(255, 255, 255, 0.05));
+    /* VK Mini App Dynamic Variables (фолбэки — реальные значения от хоста MAX не приходят) */
+    --vk-bg: var(--background_page, #000000);
+    --vk-card-bg: var(--background_content, #1C1C1E);
+    --vk-card-hover: var(--background_hover, #2C2C2E);
+
+    --vk-text-main: var(--text_primary, #FFFFFF);
+    --vk-text-muted: var(--text_secondary, #8E8E93);
+
+    --vk-button-primary-bg: var(--button_primary_background, #0077FF);
+    --vk-button-primary-text: var(--button_primary_foreground, #FFFFFF);
+
+    --vk-button-secondary-bg: var(--button_secondary_background, rgba(255, 255, 255, 0.08));
+    --vk-button-secondary-text: var(--button_secondary_foreground, #FFFFFF);
+
+    --vk-border: var(--separator_common, rgba(255, 255, 255, 0.12));
+    --vk-input-bg: var(--field_background, rgba(255, 255, 255, 0.06));
 }
 
 * {
@@ -30,7 +30,6 @@ body {
     color: var(--vk-text-main);
     line-height: 1.5;
     overflow-x: hidden;
-    transition: background-color 0.3s ease;
 }
 
 .app-container {
@@ -47,7 +46,7 @@ body {
     top: 0;
     z-index: 100;
     background: var(--vk-bg);
-    border-bottom: 1px solid var(--vk-border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .header-content {
@@ -58,12 +57,13 @@ body {
 }
 
 .logo {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: var(--vk-text-main);
     display: flex;
     align-items: center;
     gap: 8px;
+    letter-spacing: -0.01em;
 }
 
 .user-profile {
@@ -115,7 +115,7 @@ h2 {
     margin-bottom: 32px;
 }
 
-/* Sferum List style */
+/* Sferum List style (базовый — используется в карточках/формах) */
 .sferum-list {
     display: flex;
     flex-direction: column;
@@ -151,17 +151,17 @@ h2 {
 
 .bg-gradient-blue {
     background: linear-gradient(135deg, #0077FF 0%, #00BFFF 100%);
-    box-shadow: 0 4px 12px rgba(0, 119, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 119, 255, 0.25);
 }
 
 .bg-gradient-purple {
     background: linear-gradient(135deg, #8A2BE2 0%, #DA70D6 100%);
-    box-shadow: 0 4px 12px rgba(138, 43, 226, 0.2);
+    box-shadow: 0 4px 12px rgba(138, 43, 226, 0.25);
 }
 
 .bg-gradient-red {
     background: linear-gradient(135deg, #FF4500 0%, #FF8C00 100%);
-    box-shadow: 0 4px 12px rgba(255, 69, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(255, 69, 0, 0.25);
 }
 
 .item-text {
@@ -185,7 +185,68 @@ h2 {
     color: var(--vk-text-muted);
     font-size: 1.5rem;
     font-family: monospace;
-    opacity: 0.5;
+    opacity: 0.4;
+}
+
+/* === Плитки главного меню (как сетка иконок в VK) === */
+.vk-tile-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.vk-tile-row .sferum-list-item {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 18px 6px;
+    gap: 10px;
+    border-radius: 20px;
+}
+
+.vk-tile-row .item-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    font-size: 26px;
+}
+
+.vk-tile-row .item-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    white-space: normal;
+}
+
+.vk-tile-row .item-subtitle,
+.vk-tile-row .item-chevron {
+    display: none;
+}
+
+/* === Плоский список внутри карточек (как настройки VK) === */
+.vk-card .sferum-list-item {
+    background: transparent;
+    border-radius: 0;
+    padding: 14px 4px;
+    border-bottom: 1px solid var(--vk-border);
+}
+
+.vk-card .sferum-list-item:last-child {
+    border-bottom: none;
+}
+
+.vk-card .sferum-list-item:active {
+    transform: none;
+    background: var(--vk-card-hover);
+}
+
+.vk-card .item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    font-size: 16px;
 }
 
 /* VK Cards */
@@ -262,7 +323,7 @@ h2 {
 
 .input-group input:focus, .input-group select:focus {
     border-color: var(--vk-text-muted);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .select-wrapper {
