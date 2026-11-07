@@ -275,7 +275,7 @@ def kb_admin() -> dict:
 async def show_admin_panel(session: aiohttp.ClientSession, uid: int, chat_id: Optional[int]):
     if not db_is_admin(uid):
         return
-    url = f"{WEBHOOK_BASE_URL}/app?v=9#admin-panel" if WEBHOOK_BASE_URL else "vk.com/app?v=9#admin-panel"
+    url = f"{WEBHOOK_BASE_URL}/app?v=9#admin-panel" if WEBHOOK_BASE_URL else "ОШИБКА: WEBHOOK_BASE_URL не задан в .env"
     url_clean = url.replace("https://", "").replace("http://", "")
     msg = f"🛡 Вы в панели администратора.\n\n🌐 Открыть Админ-Панель:\n{url_clean}\n\nВыберите действие ниже:"
     await api_send(session, msg, kb_admin(), user_id=uid, chat_id=chat_id)
