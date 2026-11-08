@@ -1289,7 +1289,23 @@ async def run_webhook_server(session: aiohttp.ClientSession):
     app.router.add_static("/app/static/", path=os.path.join(os.path.dirname(__file__), "webapp"), name="webapp")
 
     # API endpoints для мини-приложения
+    def check_admin_code(request: web.Request) -> bool:
+        code = request.headers.get("X-Admin-Code", "").strip()
+        if not code:
+            return False
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT used_by FROM admin_codes WHERE code = %s", (code,))
+                row = cur.fetchone()
+                if not row or row[0] is None:
+                    return False
+                cur.execute("SELECT is_admin FROM users WHERE user_id = %s", (row[0],))
+                admin_row = cur.fetchone()
+                return bool(admin_row and admin_row[0])
+
     async def api_admin_stats(request: web.Request) -> web.Response:
+        if not check_admin_code(request):
+            return web.json_response({"text": "Доступ запрещён."}, status=403)
         with get_db() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT COUNT(*) FROM users")
@@ -1310,6 +1326,8 @@ async def run_webhook_server(session: aiohttp.ClientSession):
         return web.json_response({"text": stats_html})
 
     async def api_admin_recent(request: web.Request) -> web.Response:
+        if not check_admin_code(request):
+            return web.json_response({"text": "Доступ запрещён."}, status=403)
         with get_db() as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
                 cur.execute("SELECT title, type FROM items ORDER BY id DESC LIMIT 5")
@@ -1326,6 +1344,8 @@ async def run_webhook_server(session: aiohttp.ClientSession):
         return web.json_response({"text": res})
 
     async def api_admin_list(request: web.Request) -> web.Response:
+        if not check_admin_code(request):
+            return web.json_response({"text": "Доступ запрещён."}, status=403)
         with get_db() as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
                 cur.execute("SELECT user_name FROM users WHERE is_admin = TRUE")
@@ -1370,6 +1390,8 @@ async def run_webhook_server(session: aiohttp.ClientSession):
         return web.json_response({"ok": True, "id": item_id})
 
     async def api_gencode(request: web.Request) -> web.Response:
+        if not check_admin_code(request):
+            return web.json_response({"text": "Доступ запрещён."}, status=403)
         import random, string
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
         with get_db() as conn:
@@ -1382,7 +1404,24 @@ async def run_webhook_server(session: aiohttp.ClientSession):
     app.router.add_get("/app/api/admin/list", api_admin_list)
     app.router.add_get("/app/api/search", api_search)
     app.router.add_post("/app/api/items", api_add_item)
+    async def api_clear_items(request: web.Request) -> web.Response:
+        if not check_admin_code(request):
+            return web.json_response({"ok": False, "text": "Доступ запрещён."}, status=403)
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        if body.get("confirm") != "УДАЛИТЬ":
+            return web.json_response({"ok": False, "text": "Подтверждение не совпадает."}, status=400)
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) FROM items")
+                count_before = cur.fetchone()[0]
+                cur.execute("TRUNCATE TABLE items")
+        return web.json_response({"ok": True, "text": f"Удалено записей: {count_before}"})
+
     app.router.add_post("/app/api/admin/gencode", api_gencode)
+    app.router.add_post("/app/api/admin/clear", api_clear_items)
 
     app.router.add_post("/webhook", webhook_handler)
     app.router.add_get("/health", health_check)

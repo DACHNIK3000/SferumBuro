@@ -1,3 +1,5 @@
+let adminCode = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     if (window.vkBridge) {
         vkBridge.send('VKWebAppInit');
@@ -55,6 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function showSection(sectionId) {
+    if (sectionId === 'admin-panel' && !adminCode) {
+        const code = prompt('Введите код администратора:');
+        if (!code) return;
+        adminCode = code.trim();
+    }
+
     document.getElementById('main-section').classList.add('hidden');
     document.getElementById('add-item').classList.add('hidden');
     document.getElementById('search-item').classList.add('hidden');
@@ -67,39 +75,61 @@ function showSection(sectionId) {
     }
 }
 
+function adminFetch(url, options = {}) {
+    options.headers = Object.assign({}, options.headers, { 'X-Admin-Code': adminCode || '' });
+    return fetch(url, options).then(r => {
+        if (r.status === 403) {
+            adminCode = null;
+            throw new Error('forbidden');
+        }
+        return r.json();
+    });
+}
+
 function adminAction(actionType) {
     const results = document.getElementById('adminResults');
     results.style.display = 'block';
     results.innerHTML = '<span style="color: var(--vk-text-muted);">Загрузка...</span>';
 
     if (actionType === 'stats') {
-        fetch('/app/api/admin/stats')
-            .then(r => r.json())
+        adminFetch('/app/api/admin/stats')
             .then(data => { results.innerHTML = data.text; })
-            .catch(() => { results.innerHTML = 'Ошибка при загрузке'; });
+            .catch(() => { results.innerHTML = 'Ошибка доступа. Введите код ещё раз.'; });
 
     } else if (actionType === 'recent') {
-        fetch('/app/api/admin/recent')
-            .then(r => r.json())
+        adminFetch('/app/api/admin/recent')
             .then(data => { results.innerHTML = data.text; })
-            .catch(() => { results.innerHTML = 'Ошибка при загрузке'; });
+            .catch(() => { results.innerHTML = 'Ошибка доступа. Введите код ещё раз.'; });
 
     } else if (actionType === 'list_admins') {
-        fetch('/app/api/admin/list')
-            .then(r => r.json())
+        adminFetch('/app/api/admin/list')
             .then(data => { results.innerHTML = data.text; })
-            .catch(() => { results.innerHTML = 'Ошибка при загрузке'; });
+            .catch(() => { results.innerHTML = 'Ошибка доступа. Введите код ещё раз.'; });
 
     } else if (actionType === 'gen_code') {
-        fetch('/app/api/admin/gencode', { method: 'POST' })
-            .then(r => r.json())
+        adminFetch('/app/api/admin/gencode', { method: 'POST' })
             .then(data => {
                 results.innerHTML = `<b>Новый код доступа:</b><br><code style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 8px;">${data.code}</code>`;
             })
-            .catch(() => { results.innerHTML = 'Ошибка'; });
+            .catch(() => { results.innerHTML = 'Ошибка доступа. Введите код ещё раз.'; });
 
     } else if (actionType === 'revoke_admin') {
         results.innerHTML = 'Снять права можно командой боту: /admin revoke [user_id]';
+
+    } else if (actionType === 'clear_db') {
+        const typed = prompt('Это НЕОБРАТИМО удалит все находки и потери. Введите слово УДАЛИТЬ для подтверждения:');
+        if (typed !== 'УДАЛИТЬ') {
+            results.innerHTML = 'Отменено.';
+            return;
+        }
+        results.innerHTML = '<span style="color: var(--vk-text-muted);">Удаление...</span>';
+        adminFetch('/app/api/admin/clear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ confirm: typed })
+        })
+            .then(data => { results.innerHTML = data.text; })
+            .catch(() => { results.innerHTML = 'Ошибка доступа. Введите код ещё раз.'; });
     }
 }
 

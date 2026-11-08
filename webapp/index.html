@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Бюро находок Сферум</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="static/style.css?v=11">
+    <link rel="stylesheet" href="static/style.css?v=13">
 </head>
 <body>
     <div class="app-container">
@@ -127,6 +127,10 @@
                             <div class="item-icon bg-gradient-red" style="font-size:16px;">❌</div>
                             <div class="item-text"><div class="item-title">Снять админа</div></div>
                         </div>
+                        <div class="sferum-list-item" onclick="adminAction('clear_db')">
+                            <div class="item-icon bg-gradient-red" style="font-size:16px;">🗑</div>
+                            <div class="item-text"><div class="item-title">Очистить базу находок</div></div>
+                        </div>
                     </div>
 
                     <div id="adminResults" style="margin-top: 24px; display: none; background: rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; text-align: left; font-size: 0.95rem; color: var(--text-main);">
@@ -141,6 +145,6 @@
 
     <!-- VK Bridge -->
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
-    <script src="static/app.js?v=11"></script>
+    <script src="static/app.js?v=13"></script>
 </body>
 </html>
