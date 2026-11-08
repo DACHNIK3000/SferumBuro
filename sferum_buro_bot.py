@@ -356,9 +356,10 @@ def kb_share_menu() -> dict:
     return {
         "buttons": [
             [{"type": "callback", "text": "📤 Поделиться", "payload": "share_offer"},
-             {"type": "callback", "text": "👀 Доступно", "payload": "share_list"}],
-            [{"type": "callback", "text": "🎒 Мои вещи", "payload": "share_my"},
-             {"type": "callback", "text": "⬅️ В главное меню", "payload": "menu_start"}],
+             {"type": "callback", "text": "🙋 Попросить", "payload": "share_request"}],
+            [{"type": "callback", "text": "👀 Доступно", "payload": "share_list"},
+             {"type": "callback", "text": "🎒 Мои вещи", "payload": "share_my"}],
+            [{"type": "callback", "text": "⬅️ В главное меню", "payload": "menu_start"}],
         ]
     }
 
@@ -486,6 +487,9 @@ HELP_TEXT = (
     "📦 «Нашёл вещь»:\n"
     "Сдали чужую вещь на вахту или в учительскую? Зарегистрируйте её тут. "
     "Бот автоматически найдёт владельца и отправит ему личное сообщение!\n\n"
+    "🏠 Забрали находку домой?\n"
+    "Зарегистрируйте её через «Нашёл вещь» и оставьте ссылку на свой аккаунт в MAX "
+    "в описании — так хозяин сможет сразу с вами связаться.\n\n"
     "🗂 «Витрина находок»:\n"
     "Список всех вещей, которые прямо сейчас лежат в школе (на вахте / в учительской).\n\n"
     "🔄 «Школьный шеринг»:\n"
@@ -658,6 +662,29 @@ async def complete_share_registration(session: aiohttp.ClientSession, uid: int, 
     )
     await api_send(session, conf_text, kb_share_menu(), user_id=uid, chat_id=chat_id)
 
+async def complete_share_request(session: aiohttp.ClientSession, uid: int, chat_id: Optional[int], data: dict):
+    title = data.get("title", "")
+
+    user_info = db_get_user(uid)
+    uname = user_info.get("user_name") or "Ученик"
+
+    item_id = db_create_item(
+        item_type="share_request",
+        user_id=uid,
+        chat_id=chat_id,
+        user_name=uname,
+        title=title,
+        category="cat_other",
+        place="—"
+    )
+    db_clear_state(uid)
+
+    conf_text = (
+        f"✅ Запрос «{title}» опубликован в шеринге!\n\n"
+        f"Если у кого-то есть такая вещь, он сможет найти ваш запрос в разделе «Доступно»."
+    )
+    await api_send(session, conf_text, kb_share_menu(), user_id=uid, chat_id=chat_id)
+
 async def show_catalog(session: aiohttp.ClientSession, uid: int, chat_id: Optional[int], category: Optional[str] = None):
     cat_name = CATEGORY_MAP.get(category, "Все категории") if category else "Все категории"
     items = db_get_active_items(item_type="found", limit=10, category=category)
@@ -712,27 +739,42 @@ async def show_my_items(session: aiohttp.ClientSession, uid: int, chat_id: Optio
     await api_send(session, "Вы можете закрыть или удалить любую заявку кнопками выше 👆", kb_main(uid), user_id=uid, chat_id=chat_id)
 
 async def show_sharing_list(session: aiohttp.ClientSession, uid: int, chat_id: Optional[int]):
-    items = db_get_active_items(item_type="share", limit=15)
-    if not items:
+    offers = db_get_active_items(item_type="share", limit=15)
+    requests = db_get_active_items(item_type="share_request", limit=15)
+
+    if not offers and not requests:
         await api_send(
             session,
-            "🔄 В шеринге сейчас нет свободных вещей.\n\n"
-            "Будьте первым — поделитесь ручкой, зарядкой или калькулятором на перемену!",
+            "🔄 В шеринге сейчас нет ни предложений, ни запросов.\n\n"
+            "Будьте первым — поделитесь вещью или попросите то, что нужно!",
             kb_share_menu(),
             user_id=uid,
             chat_id=chat_id
         )
         return
 
-    msg = "🔄 ДОСТУПНО В ШКОЛЬНОМ ШЕРИНГЕ:\n\n"
-    for idx, it in enumerate(items, 1):
-        uname = it.get("user_name") or "Ученик"
-        msg += (
-            f"{idx}. ⚡ {it['title']}\n"
-            f"   📍 Где и когда: {it['place']}\n"
-            f"   👤 Предложил: {uname}\n\n"
-        )
-    msg += "👉 Найдите ученика в указанном кабинете, чтобы взять вещь на урок!"
+    msg = "🔄 ШКОЛЬНЫЙ ШЕРИНГ:\n\n"
+
+    if offers:
+        msg += "📤 ПРЕДЛАГАЮТ:\n"
+        for idx, it in enumerate(offers, 1):
+            uname = it.get("user_name") or "Ученик"
+            msg += (
+                f"{idx}. ⚡ {it['title']}\n"
+                f"   📍 Где и когда: {it['place']}\n"
+                f"   👤 Предложил: {uname}\n\n"
+            )
+
+    if requests:
+        msg += "🙋 ИЩУТ:\n"
+        for idx, it in enumerate(requests, 1):
+            uname = it.get("user_name") or "Ученик"
+            msg += (
+                f"{idx}. ❔ {it['title']}\n"
+                f"   👤 Спрашивает: {uname}\n\n"
+            )
+
+    msg += "👉 Если можете помочь — найдите автора и свяжитесь с ним напрямую!"
     await api_send(session, msg, kb_share_menu(), user_id=uid, chat_id=chat_id)
 
 async def show_my_shares(session: aiohttp.ClientSession, uid: int, chat_id: Optional[int]):
@@ -758,6 +800,10 @@ async def handle_message(session: aiohttp.ClientSession, update: dict):
     msg = update.get("message", {}) or {}
     body = msg.get("body", {}) or {}
     text = (body.get("text") or msg.get("text") or "").strip()
+    # MAX иногда вставляет невидимый символ автодополнения перед командой (например, перед "/admin")
+    slash_idx = text.find("/")
+    if slash_idx > 0 and slash_idx <= 2:
+        text = text[slash_idx:]
 
     attachments = body.get("attachments") or msg.get("attachments") or []
     photo_id = None
@@ -925,6 +971,11 @@ async def handle_message(session: aiohttp.ClientSession, update: dict):
     elif state == "share_place":
         data["place"] = text
         await complete_share_registration(session, uid, chat_id, data)
+        return
+
+    elif state == "share_request_title":
+        data["title"] = text
+        await complete_share_request(session, uid, chat_id, data)
         return
 
     elif state == "admin_wait_delete":
@@ -1191,6 +1242,17 @@ async def handle_callback(session: aiohttp.ClientSession, update: dict):
         await api_send(
             session,
             "📤 Что вы готовы одолжить? (например: «Зарядка Type-C», «Калькулятор Casio», «Циркуль», «Маркер»):",
+            kb_cancel(),
+            user_id=uid,
+            chat_id=chat_id
+        )
+        return
+
+    elif payload == "share_request":
+        db_set_user(uid, state="share_request_title", data={})
+        await api_send(
+            session,
+            "🙋 Что вам нужно? (например: «Зарядка Type-C», «Циркуль», «Чёрная ручка»):",
             kb_cancel(),
             user_id=uid,
             chat_id=chat_id
