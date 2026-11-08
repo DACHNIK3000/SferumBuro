@@ -275,9 +275,7 @@ def kb_admin() -> dict:
 async def show_admin_panel(session: aiohttp.ClientSession, uid: int, chat_id: Optional[int]):
     if not db_is_admin(uid):
         return
-    url = f"{WEBHOOK_BASE_URL}/app?v=9#admin-panel" if WEBHOOK_BASE_URL else "ОШИБКА: WEBHOOK_BASE_URL не задан в .env"
-    url_clean = url.replace("https://", "").replace("http://", "")
-    msg = f"🛡 Вы в панели администратора.\n\n🌐 Открыть Админ-Панель:\n{url_clean}\n\nВыберите действие ниже:"
+    msg = "🛡 Вы в панели администратора.\n\nВыберите действие ниже:"
     await api_send(session, msg, kb_admin(), user_id=uid, chat_id=chat_id)
 
 async def show_admin_stats(session: aiohttp.ClientSession, uid: int, chat_id: Optional[int]):
@@ -852,14 +850,7 @@ async def handle_message(session: aiohttp.ClientSession, update: dict):
 
     elif state == "lost_details":
         data["details"] = text
-        db_set_user(uid, state="lost_photo", data=data)
-        await api_send(
-            session,
-            "И последнее: прикрепите фото потерянной вещи (если есть), либо нажмите «Пропустить»:",
-            kb_skip_or_cancel(),
-            user_id=uid,
-            chat_id=chat_id
-        )
+        await complete_lost_registration(session, uid, chat_id, data)
         return
 
     elif state == "lost_photo":
@@ -893,14 +884,7 @@ async def handle_message(session: aiohttp.ClientSession, update: dict):
 
     elif state == "found_details":
         data["details"] = text
-        db_set_user(uid, state="found_photo", data=data)
-        await api_send(
-            session,
-            "И последнее: прикрепите фото находки (если есть), либо нажмите «Пропустить»:",
-            kb_skip_or_cancel(),
-            user_id=uid,
-            chat_id=chat_id
-        )
+        await complete_found_registration(session, uid, chat_id, data)
         return
 
     elif state == "found_photo":
@@ -1150,15 +1134,9 @@ async def handle_callback(session: aiohttp.ClientSession, update: dict):
         
         if state == "lost_details":
             data["details"] = ""
-            db_set_user(uid, state="lost_photo", data=data)
-            await api_send(session, "И последнее: прикрепите фото потерянной вещи (если есть), либо нажмите «Пропустить»:", kb_skip_or_cancel(), user_id=uid, chat_id=chat_id)
+            await complete_lost_registration(session, uid, chat_id, data)
         elif state == "found_details":
             data["details"] = ""
-            db_set_user(uid, state="found_photo", data=data)
-            await api_send(session, "И последнее: прикрепите фото находки (если есть), либо нажмите «Пропустить»:", kb_skip_or_cancel(), user_id=uid, chat_id=chat_id)
-        elif state == "lost_photo":
-            await complete_lost_registration(session, uid, chat_id, data)
-        elif state == "found_photo":
             await complete_found_registration(session, uid, chat_id, data)
         else:
             await handle_start(session, uid, chat_id, user_name)
@@ -1384,9 +1362,13 @@ async def run_webhook_server(session: aiohttp.ClientSession):
             return web.json_response({"ok": False}, status=400)
         title = body.get("title", "").strip()
         place = body.get("place", "").strip()
+        details = body.get("details", "").strip()
+        item_type = body.get("type", "found").strip()
+        if item_type not in ("found", "lost"):
+            item_type = "found"
         if not title or not place:
             return web.json_response({"ok": False}, status=400)
-        item_id = db_create_item("found", 0, None, "webapp", title, "cat_other", place)
+        item_id = db_create_item(item_type, 0, None, "webapp", title, "cat_other", place, details=details)
         return web.json_response({"ok": True, "id": item_id})
 
     async def api_gencode(request: web.Request) -> web.Response:

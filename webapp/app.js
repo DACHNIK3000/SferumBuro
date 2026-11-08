@@ -27,11 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = document.getElementById('itemName').value;
             const cat = document.getElementById('itemCategory').value;
             const place = document.getElementById('itemPlace').value;
+            const details = document.getElementById('itemDetails').value;
 
             fetch('/app/api/items', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: name, category: cat, place: place, type: 'found' })
+                body: JSON.stringify({ title: name, category: cat, place: place, details: details, type: 'found' })
             })
             .then(r => r.json())
             .then(() => {
@@ -42,6 +43,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     showSection('main');
                     addForm.reset();
+                    btn.innerHTML = orig;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 2000);
+            })
+            .catch(() => {
+                btn.innerHTML = orig;
+                btn.style.opacity = '1';
+                alert('Не удалось отправить, попробуйте ещё раз');
+            });
+        });
+    }
+
+    const lostForm = document.getElementById('lostForm');
+    if (lostForm) {
+        lostForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = lostForm.querySelector('.vk-btn-primary');
+            const orig = btn.innerHTML;
+            btn.innerHTML = 'Отправка...';
+            btn.style.opacity = '0.7';
+
+            const name = document.getElementById('lostName').value;
+            const cat = document.getElementById('lostCategory').value;
+            const place = document.getElementById('lostPlace').value;
+            const details = document.getElementById('lostDetails').value;
+
+            fetch('/app/api/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: name, category: cat, place: place, details: details, type: 'lost' })
+            })
+            .then(r => r.json())
+            .then(() => {
+                btn.innerHTML = 'Зарегистрировано!';
+                btn.style.background = '#4CAF50';
+                btn.style.color = 'white';
+                btn.style.opacity = '1';
+                setTimeout(() => {
+                    showSection('main');
+                    lostForm.reset();
                     btn.innerHTML = orig;
                     btn.style.background = '';
                     btn.style.color = '';

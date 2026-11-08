@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Бюро находок Сферум</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="static/style.css?v=13">
+    <link rel="stylesheet" href="static/style.css?v=14">
 </head>
 <body>
     <div class="app-container">
@@ -78,6 +78,10 @@
                             <label>Где нашли?</label>
                             <input type="text" id="itemPlace" placeholder="Например: Двор" required>
                         </div>
+                        <div class="input-group">
+                            <label>Особые приметы (необязательно)</label>
+                            <input type="text" id="itemDetails" placeholder="Например: царапина на экране">
+                        </div>
                         <button type="submit" class="vk-btn-primary full-width mt-2">Сообщить</button>
                         <button type="button" class="vk-btn-secondary full-width mt-1" onclick="showSection('main')">Отмена</button>
                     </form>
@@ -97,6 +101,37 @@
                     
                     <div id="searchResults" style="margin-top: 24px; display: none;">
                         <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">Результаты поиска появятся здесь</p>
+                    </div>
+
+                    <div style="margin-top: 24px; border-top: 1px solid var(--vk-border); padding-top: 24px;">
+                        <h2 style="font-size: 1.05rem;">Не нашли? Зарегистрируйте потерю</h2>
+                        <form id="lostForm">
+                            <div class="input-group">
+                                <label>Что вы потеряли?</label>
+                                <input type="text" id="lostName" placeholder="Например: Ключи" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Категория</label>
+                                <div class="select-wrapper">
+                                    <select id="lostCategory">
+                                        <option>Электроника</option>
+                                        <option>Одежда</option>
+                                        <option>Документы</option>
+                                        <option>Ключи</option>
+                                        <option>Другое</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Где потеряли?</label>
+                                <input type="text" id="lostPlace" placeholder="Например: Двор" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Особые приметы (необязательно)</label>
+                                <input type="text" id="lostDetails" placeholder="Например: царапина на экране">
+                            </div>
+                            <button type="submit" class="vk-btn-primary full-width mt-2">Зарегистрировать потерю</button>
+                        </form>
                     </div>
                 </div>
             </section>
@@ -145,6 +180,6 @@
 
     <!-- VK Bridge -->
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
-    <script src="static/app.js?v=13"></script>
+    <script src="static/app.js?v=14"></script>
 </body>
 </html>
